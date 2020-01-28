@@ -1,0 +1,42 @@
+/*
+ ============================================================================
+ Name        : MPI_MINLOC.c
+ Author      : katty
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Hello MPI World in C 
+ ============================================================================
+ */
+
+#define  LEN   1000
+
+float val[LEN];        /* valores locales del array */
+int count;             /* Valores de los numeros locales */
+int myrank, minrank, minindex;
+float minval;
+
+struct {
+    float value;
+    int   index;
+} in, out;
+
+in.value = val[0];
+in.index = 0;
+for (i=1; i < count; i++)
+    if (in.value > val[i]) {
+        in.value = val[i];
+        in.index = i;
+    }
+
+
+MPI_Comm_rank(MPI_COMM_WORLD, &myrank);
+in.index = myrank*LEN + in.index;
+MPI_Reduce( in, out, 1, MPI_FLOAT_INT, MPI_MINLOC, root, comm );
+
+if (myrank == root) {
+    /* read answer out
+     */
+    minval = out.value;
+    minrank = out.index / LEN;
+    minindex = out.index % LEN;
+}
